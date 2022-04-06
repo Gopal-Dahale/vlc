@@ -1,6 +1,7 @@
-from turtle import st
 import RPi.GPIO as GPIO
 import time
+from dahuffman import HuffmanCodec
+import ast
 
 GPIO.setmode(GPIO.BOARD)
 data_pin = 12
@@ -9,7 +10,7 @@ GPIO.setup(data_pin, GPIO.OUT, initial=0)
 filename = 'message.txt'
 f = open(filename, 'r')
 msg = f.read()
-time_period = 0.05  # seconds
+time_period = 0.005  # seconds
 
 
 def print_stats(duration):
@@ -28,30 +29,21 @@ def transmit_byte(byte):
 
 
 def run():
+    codec = HuffmanCodec.from_data(msg)
+    encoded_msg = codec.encode(msg)
 
-    # synchronize
+    # Transmit codec table
+    table = str(codec.get_code_table())
+    for byte in table:
+        transmit_byte(byte)
 
-    # Transmit HIGH for some period of time
-    # and then transmit LOW for the reciever
-    # to detect the start of the message
-    sync_time = 10 * time_period
-    HIGH = chr(1)
-    LOW = chr(0)
-    start = time.time()
-    while (time.time() - start < sync_time):
-        transmit_byte(HIGH)
-
-    transmit_byte(LOW)  # start of message
-    time.sleep(time_period)
-
-    # Transmit the message
-    iterations = 4  # number of times to transmit the message
-    for i in range(iterations):
+    for i in range(4):
         start = time.time()
         print('Starting transmission\n')
-        for msg_byte in msg:
+        for msg_byte in encoded_msg:
             transmit_byte(msg_byte)
         end = time.time()
+
         print_stats(end - start)
 
 
