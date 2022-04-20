@@ -1,1 +1,0 @@
-print(ord(chr(1)))

@@ -38,11 +38,11 @@ def run():
     HIGH = chr(255)
     LOW = chr(0)
     start = time.time()
-    
+
     #send high
     while (time.time() - start < sync_time):
         transmit_byte(HIGH)
-    
+
     #send low for neg edge
     transmit_byte(LOW)  # start of message
     time.sleep(time_period)
