@@ -1,7 +1,7 @@
 import time
 import Adafruit_GPIO.SPI as SPI
 import Adafruit_MCP3008
-
+from utils import print_stats
 #data_pin = 12
 #GPIO.setup(data_pin, GPIO.OUT, initial=0)
 
@@ -15,12 +15,6 @@ mcp = Adafruit_MCP3008.MCP3008(clk=CLK, cs=CS, miso=MISO, mosi=MOSI)
 
 time_period = 0.150  # seconds
 threshold = 350
-
-
-def print_stats(duration):
-    print('Total bits send: ', len(msg) * 8)
-    print('Total time taken(s): ', duration)
-    print('Datarate(bps): ', len(msg) * 8 / (duration))
 
 
 def run():
