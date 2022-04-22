@@ -1,6 +1,7 @@
 import time
 import Adafruit_GPIO.SPI as SPI
 import Adafruit_MCP3008
+from utils import threshold, time_period
 
 data_pin = 12
 GPIO.setup(data_pin, GPIO.OUT, initial=0)
@@ -13,9 +14,6 @@ CS = 25
 channel = 0
 # mcp = Adafruit_MCP3008.MCP3008(clk=CLK, cs=CS, miso=MISO, mosi=MOSI)
 
-time_period = 0.150  # seconds
-# threshold = 350
-threshold = 0.0005
 
 
 def run():

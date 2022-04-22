@@ -6,10 +6,10 @@ GPIO.setmode(GPIO.BOARD)
 data_pin = 3
 GPIO.setup(data_pin, GPIO.OUT, initial=0)
 
-time_period = 0.5  # seconds
+time_period = 0.2  # seconds
 
 def run():
-    msg = '10'*10
+    msg = '10'*30
     # Transmit the message
     iterations = 1  # number of times to transmit the message
     for i in range(iterations):
@@ -19,9 +19,8 @@ def run():
             print(j, end='')
             GPIO.output(data_pin, int(j))
             time.sleep(time_period)
-                
+        print('\n')
         end = time.time()
-        print_stats(end - start)
 
 
 try:

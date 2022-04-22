@@ -3,6 +3,7 @@ import RPi.GPIO as GPIO
 
 # Constants
 time_period = 0.02  # seconds
+threshold = 240
 data_pin = 3
 
 

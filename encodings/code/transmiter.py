@@ -3,14 +3,13 @@ import ast
 from huffman import Huffman
 from run_length import run_length_encode, run_length_transmit
 import time
-from utils import time_period, transmit_byte, print_stats, fragment_bits, prepare_packet
+from utils import time_period, data_pin, transmit_byte, print_stats, fragment_bits, prepare_packet
 import argparse
 import pyae
 import RPi.GPIO as GPIO
 
 
 GPIO.setmode(GPIO.BOARD)
-data_pin = 3
 GPIO.setup(data_pin, GPIO.OUT, initial=0)
 
 filename = './message.txt'
