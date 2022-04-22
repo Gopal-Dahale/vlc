@@ -1,4 +1,5 @@
 import time
+import argparse
 # import Adafruit_GPIO.SPI as SPI
 # import Adafruit_MCP3008
 # from encodings.huffman.utils import print_stats
@@ -19,7 +20,10 @@ threshold = 0.0005
 
 
 def run():
-
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--table', default=False, choices=('0', '1'))
+    args = parser.parse_args()
+    is_table_transmitted = int(args.table)
     print('Reading MCP3008 values, press Ctrl-C to quit...')
 
     ################# TEST START ######################
@@ -64,6 +68,7 @@ def run():
     count = 8
     byte = 0
     string = ''
+    table_string = ''
     while True:
         # x = mcp.read_adc(channel)
         x = int(res[index])
@@ -91,7 +96,7 @@ def run():
 
             # Ideally the length of payload should be 32 bits
             # # i.e.length of payload should be 32
-
+            print("LEN PAYLOAD", len_payload)
             if (len_payload == 32):
                 # We need to recieve more 32 bits in order to fully recieve the packet
                 remaining_bits = 32
@@ -100,7 +105,10 @@ def run():
                     print(x, end='')
                     index += 1
                     x = (1 if x > threshold else 0)
-                    string += str(x)
+                    if type_payload:
+                        string += str(x)
+                    else:
+                        table_string += str(x)
                     remaining_bits -= 1
                     time.sleep(time_period)
 
@@ -116,7 +124,10 @@ def run():
                     print(x, end='')
                     index += 1
                     x = (1 if x > threshold else 0)
-                    string += str(x)
+                    if type_payload:
+                        string += str(x)
+                    else:
+                        table_string += str(x)
                     remaining_bits -= 1
                     time.sleep(time_period)
 
@@ -131,13 +142,19 @@ def run():
                         count -= 1
                         time.sleep(time_period)
 
-                    string += temp[-special_bits]
+                    if type_payload:
+                        string += temp[-special_bits:]
+                    else:
+                        table_string += temp[-special_bits:]
 
             byte = 0
 
         time.sleep(time_period)
-
+        print("TABLE STRING", table_string)
         print("STRING", string)
+
+        # print("TABLE STRING", table_string)
+        # print("STRING", string)
 
     print(str1)
 

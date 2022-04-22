@@ -6,6 +6,7 @@ from run_length import run_length_encode, run_length_transmit
 import time
 from utils import time_period, transmit_byte, print_stats
 import argparse
+import pyae
 
 # GPIO.setmode(GPIO.BOARD)
 data_pin = 12
@@ -33,11 +34,38 @@ def run():
     elif encoding == 'rle':
         out = run_length_encode(msg)
         encoded_msg = "".join([bin(ord(char))[2:].zfill(8) for char in out])
+    elif encoding == 'atm':
+        # Create Frequency table
+        frequency_table = {}
+        for ch in msg:
+            if ch in frequency_table:
+                frequency_table[ch] += 1
+            else:
+                frequency_table[ch] = 1
+        AE = pyae.ArithmeticEncoding(frequency_table=frequency_table,
+                                     save_stages=False)
+        table_bits = AE.frequency_table_to_bits()
+        print("TABLE BITS", table_bits)
+        print("LEN TABLE BITS", len(table_bits))
 
-        # print(run_length_decode(encoded_msg))
+        encoded_msg, _, interval_min_value, interval_max_value = AE.encode(
+            msg=msg, probability_table=AE.probability_table)
 
-    print('ENCODED MSG', encoded_msg)
-    print("LEN ENCODED MSG", len(encoded_msg))
+        print("Encoded Message: {msg}".format(msg=encoded_msg))
+
+        # Get the binary code out of the floating-point value
+        binary_code, _ = AE.encode_binary(float_interval_min=interval_min_value,
+                                          float_interval_max=interval_max_value)
+        print(
+            "The binary code is: {binary_code}".format(binary_code=binary_code))
+
+        encoded_msg = binary_code[2:]  # remove decimal point
+        print("LEN ENCODED MSG", len(encoded_msg))
+
+    # print(run_length_decode(encoded_msg))
+
+    # print('ENCODED MSG', encoded_msg)
+    # print("LEN ENCODED MSG", len(encoded_msg))
 
     # for i in range(len_encoded_msg):
     #     if i % max_bits_processing == 0:
@@ -74,6 +102,11 @@ def run():
         for i in range(iterations):
             duration = run_length_transmit(encoded_msg, max_payload,
                                            max_bits_processing)
+            print_stats(duration, len_msg)
+    elif encoding == 'atm':
+        for i in range(iterations):
+            duration = AE.arithmetic_transmit(table_bits, encoded_msg,
+                                              max_payload, max_bits_processing)
             print_stats(duration, len_msg)
 
 

@@ -1,4 +1,6 @@
 from decimal import Decimal
+import time
+from utils import fragment_bits, prepare_packet, transmit_byte
 
 
 class ArithmeticEncoding:
@@ -17,7 +19,7 @@ class ArithmeticEncoding:
             print(
                 "WARNING: Setting save_stages=True may cause memory overflow if the message is large."
             )
-
+        self.frequency_table = frequency_table
         self.probability_table = self.get_probability_table(frequency_table)
 
     def get_probability_table(self, frequency_table):
@@ -238,6 +240,71 @@ class ArithmeticEncoding:
             decoder.append(last_stage_probs)
 
         return decoded_msg, decoder
+
+    def frequency_table_to_bits(self):
+        # Assume key takes 1 byte and value takes 2 bytes
+
+        res = ''
+        for key, value in self.frequency_table.items():
+            res += str(bin(ord(key))[2:].zfill(8))
+            res += str(bin(value)[2:].zfill(16))
+        return res
+
+    def arithmetic_transmit(self,
+                            table_bits,
+                            encoded_msg,
+                            max_payload=32,
+                            max_bits_processing=64):
+        # Transmit Table first
+        len_encoded_msg = len(encoded_msg)
+        len_table = len(table_bits)
+        index = 0
+        start = time.time()
+        print('Starting transmission of table\n')
+        while (index < len_table):
+            fragment = fragment_bits(table_bits, index, len_encoded_msg,
+                                     max_bits_processing)
+            print("FRAGMENT", fragment)
+            print("LEN FRAGMENT", len(fragment))
+            index += max_bits_processing
+            i = 0
+            while (i < len(fragment)):
+                print('Sending packet')
+                packet = prepare_packet(fragment, 0, i, max_payload)
+                print("PACKET", packet)
+                len_packet = len(packet)
+                for k in range(0, len_packet, 8):
+                    if (k + 8 < len_packet):
+                        byte = int(packet[k:k + 8], 2)
+                    else:
+                        byte = int(packet[k:], 2)
+                    transmit_byte(byte)
+                i += max_payload
+
+        index = 0
+        print('Starting transmission of msg\n')
+        while (index < len_encoded_msg):
+            fragment = fragment_bits(encoded_msg, index, len_encoded_msg,
+                                     max_bits_processing)
+            print("FRAGMENT", fragment)
+            print("LEN FRAGMENT", len(fragment))
+            index += max_bits_processing
+            i = 0
+            while (i < len(fragment)):
+                print('Sending packet')
+                packet = prepare_packet(fragment, 1, i, max_payload)
+                print("PACKET", packet)
+                len_packet = len(packet)
+                for k in range(0, len_packet, 8):
+                    if (k + 8 < len_packet):
+                        byte = int(packet[k:k + 8], 2)
+                    else:
+                        byte = int(packet[k:], 2)
+                    transmit_byte(byte)
+                i += max_payload
+
+        end = time.time()
+        return end - start
 
 
 def float2bin(float_num, num_bits=None):
