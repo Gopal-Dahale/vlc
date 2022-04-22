@@ -4,7 +4,7 @@ import RPi.GPIO as GPIO
 import ast
 from huffman import Huffman
 import time
-from utils import fragment_bytes, prepare_packet, print_stats
+from encodings.huffman.utils import fragment_bytes, prepare_packet, print_stats
 import ast
 import pyae
 

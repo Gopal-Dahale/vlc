@@ -1,15 +1,8 @@
 import pickle
 
-
-# A Huffman Tree Node
-class Node:
-
-    def __init__(self, prob, symbol, left=None, right=None):
-        self.prob = prob  # probability of symbol
-        self.symbol = symbol  # symbol
-        self.left = left  # left node
-        self.right = right  # right node
-        self.code = ''  # tree direction (0/1)
+from Huff_Node import Node
+import time
+from utils import fragment_bits, prepare_packet, transmit_byte
 
 
 class Huffman:
@@ -74,7 +67,8 @@ class Huffman:
         encoded_output = self.Output_Encoded(data, self.huffman_encoding)
         return encoded_output, self.nodes0
 
-    def Huffman_Decoding(self, encoded_data, huffman_tree):
+    def Huffman_Decoding(self, encoded_data):
+        huffman_tree = self.nodes0
         tree_head = huffman_tree
         decoded_output = []
         for x in encoded_data:
@@ -92,14 +86,32 @@ class Huffman:
         string = ''.join([str(item) for item in decoded_output])
         return string
 
-
-""" First Test """
-data = "AAAAAasdfsadfAAAAAABBsdaasdasdfBBBBsadfasdfBasdfsadfasdCCCCCDDDDEEEF"
-print(data)
-huff = Huffman()
-encoding, tree = huff.Huffman_Encoding(data)
-print("Encoded output", encoding)
-decoded = huff.Huffman_Decoding(encoding, tree)
-print("Decoded Output", decoded)
-print(data == decoded)
-""" Second Test """
+    def Huffman_Transmit(self,
+                         encoded_msg,
+                         max_payload=32,
+                         max_bits_processing=64):
+        len_encoded_msg = len(encoded_msg)
+        index = 0
+        start = time.time()
+        print('Starting transmission\n')
+        while (index < len_encoded_msg):
+            fragment = fragment_bits(encoded_msg, index, len_encoded_msg,
+                                     max_bits_processing)
+            print("FRAGMENT", fragment)
+            print("LEN FRAGMENT", len(fragment))
+            index += max_bits_processing
+            i = 0
+            while (i < len(fragment)):
+                print('Sending packet')
+                packet = prepare_packet(fragment, 1, i, max_payload)
+                print("PACKET", packet)
+                len_packet = len(packet)
+                for k in range(0, len_packet, 8):
+                    if (k + 8 < len_packet):
+                        byte = int(packet[k:k + 8], 2)
+                    else:
+                        byte = int(packet[k:], 2)
+                    transmit_byte(byte)
+                i += max_payload
+        end = time.time()
+        return end - start
