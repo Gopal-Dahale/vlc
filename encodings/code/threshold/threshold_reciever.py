@@ -9,7 +9,7 @@ import Adafruit_GPIO.SPI as SPI
 import Adafruit_MCP3008
 import matplotlib.pyplot as plt
 
-def run()
+def run():
     # Software SPI configuration:
     CLK  = 18
     MISO = 23

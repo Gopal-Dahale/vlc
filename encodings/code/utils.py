@@ -2,8 +2,8 @@ import time
 import RPi.GPIO as GPIO
 
 # Constants
-time_period = 0.02  # seconds
-threshold = 240
+time_period = 0.05  # seconds
+threshold = 260
 data_pin = 3
 
 
@@ -18,17 +18,17 @@ def add_header(payload, type_payload, len_payload):
     type: 0 for table, 1 for data
     len: 4 bits representing maximum of 15 bytes
     '''
-    print('payload: ', payload)
-    print('type_payload: ', type_payload)
-    print('len_payload: ', len_payload)
-    print('bin type_payload', bin(type_payload)[2:])
-    print('bin len_payload', bin(len_payload)[2:].zfill(7))
+    # print('payload: ', payload)
+    # print('type_payload: ', type_payload)
+    # print('len_payload: ', len_payload)
+    # print('bin type_payload', bin(type_payload)[2:])
+    # print('bin len_payload', bin(len_payload)[2:].zfill(7))
     header = bin(type_payload)[2:] + bin(len_payload)[2:].zfill(7)
-    print('header', header)
-    print('len header', len(header))
+    # print('header', header)
+    # print('len header', len(header))
     packet = header + payload
-    print('packet', packet)
-    print('len packet', len(packet))
+    # print('packet', packet)
+    # print('len packet', len(packet))
     return packet
 
 
@@ -62,10 +62,10 @@ def transmit_byte(byte):
     # bit_stream = byte
     # print(bit_stream)
     i = 7
-    print("BYTE", byte)
+    # print("BYTE", byte)
 
     while (i >= 0):
-        print(1 if (byte & (1 << i)) else 0, end='')
+        print(1 if (byte & (1 << i)) else 0, end = '')
 
         ################# TEST START ######################
         # file = open('transmit_out.txt', 'a')
@@ -77,4 +77,4 @@ def transmit_byte(byte):
         # GPIO.output(data_pin, 1)
         time.sleep(time_period)
         i -= 1
-    print('\n')
+    # print('\n')
