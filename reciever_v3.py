@@ -6,7 +6,7 @@ import RPi.GPIO as GPIO
 
 HIGH = 275
 LOW = 250
-MID = 400
+MID = 300
 
 # data_pin = 12
 # GPIO.setmode(GPIO.BOARD)
@@ -95,13 +95,6 @@ def run():
         x = return_bit(x)
         byte += (x << (count - 1))
         print('bit',x)
-        
-        '''
-        try:
-            byte += (x << (count - 1))
-        except:
-            print('something went wrong',string)
-        '''
         count -= 1      
 
         # A byte is recieved
@@ -121,7 +114,7 @@ def run():
 
             # Ideally the length of payload should be 32 bits
             # # i.e.length of payload should be 32
-            if (len_payload == 32):
+            if (1):
                 # We need to recieve more 32 bits in order to fully recieve the packet
                 remaining_bits = 32
                 while remaining_bits:
@@ -137,47 +130,7 @@ def run():
                         table_string += str(x)
                     remaining_bits -= 1
                     time.sleep(time_period)
-            '''
-            elif (len_payload < 32):
-                # This case arises in the terminal stage of the fragment
-                max_num_bytes = len_payload // 8  # Maximum number of proper bytes we can capture
-                remaining_bits = max_num_bytes * 8
-                special_bits = len_payload - remaining_bits
-                count = 8
-
-                while remaining_bits:
-                    x = mcp.read_adc(channel)
-                    # x = int(res[index])
-                    # print(x, end='')
-                    # index += 1
-                    x = return_bit(x)
-                    if type_payload:
-                        string += str(x)
-                    else:
-                        table_string += str(x)
-                    remaining_bits -= 1
-                    time.sleep(time_period)
-
-                if special_bits:
-                    temp = ''
-                    while count:
-                        x = mcp.read_adc(channel)
-                        # x = int(res[index])
-                        # print(x, end='')
-                        # index += 1
-                        x = return_bit(x)   
-                        # print(x)
-                        temp += str(x)
-                        count -= 1
-                        time.sleep(time_period)
-
-                    if type_payload:
-                        string += temp[-special_bits:]
-                    else:
-                        table_string += temp[-special_bits:]
-                # print(x)
-            byte = 0    
-            '''    
+        
         
         time.sleep(time_period)
         # print("TABLE STRING", table_string)
