@@ -1,10 +1,9 @@
 import time
-import argparse
-# import Adafruit_GPIO.SPI as SPI
-# import Adafruit_MCP3008
-# from encodings.huffman.utils import print_stats
-#data_pin = 12
-#GPIO.setup(data_pin, GPIO.OUT, initial=0)
+import Adafruit_GPIO.SPI as SPI
+import Adafruit_MCP3008
+
+data_pin = 12
+GPIO.setup(data_pin, GPIO.OUT, initial=0)
 
 # Software SPI configuration:
 CLK = 18
@@ -20,10 +19,6 @@ threshold = 0.0005
 
 
 def run():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--table', default=False, choices=('0', '1'))
-    args = parser.parse_args()
-    is_table_transmitted = int(args.table)
     print('Reading MCP3008 values, press Ctrl-C to quit...')
 
     ################# TEST START ######################
@@ -57,8 +52,8 @@ def run():
                 if (x < threshold):
                     break
 
-            #0 detected after detecting 1
-            #wait for 1 T and sample
+            # 0 detected after detecting 1
+            # wait for 1 T and sample
             print('neg edge detected')
             time.sleep(time_period * 1)
             index += 7
@@ -67,43 +62,44 @@ def run():
     # Recieve the message
     count = 8
     byte = 0
-    string = ''
-    table_string = ''
+    string = ''  # Holds the message in bits
+    table_string = ''  # Holds the table in bits
     while True:
-        # x = mcp.read_adc(channel)
-        x = int(res[index])
-        print(x, end='')
-        index += 1
+        x = mcp.read_adc(channel)
+        # x = int(res[index])
+        # print(x, end='')
+        # index += 1
 
         x = (1 if x > threshold else 0)
         byte += (x << (count - 1))
         count -= 1
 
-        # a byte recieved
+        # A byte is recieved
         if (count == 0):
-            print('\n')
-            print('byte recieved')
+            # print('\n')
+            # print('byte recieved')
             count = 8
-            print(bin(byte)[2:].zfill(8))
+            # print(bin(byte)[2:].zfill(8))
 
             # Since this is the first byte of a packet
             # it contains header which has info about the
             # packet
             type_payload = (byte >> 7)
             len_payload = (byte & 0x7F)
-            print('type payload', type_payload)
-            print('len_payload', bin(len_payload)[2:].zfill(7))
+            # print('type payload', type_payload)
+            # print('len_payload', bin(len_payload)[2:].zfill(7))
+            # print("LEN PAYLOAD", len_payload)
 
             # Ideally the length of payload should be 32 bits
             # # i.e.length of payload should be 32
-            print("LEN PAYLOAD", len_payload)
             if (len_payload == 32):
                 # We need to recieve more 32 bits in order to fully recieve the packet
                 remaining_bits = 32
                 while remaining_bits:
-                    x = int(res[index])
-                    print(x, end='')
-                    index += 1
+                    x = mcp.read_adc(channel)
+                    # x = int(res[index])
+                    # print(x, end='')
+                    # index += 1
                     x = (1 if x > threshold else 0)
                     if type_payload:
                         string += str(x)
@@ -120,9 +116,10 @@ def run():
                 count = 8
 
                 while remaining_bits:
-                    x = int(res[index])
-                    print(x, end='')
-                    index += 1
+                    x = mcp.read_adc(channel)
+                    # x = int(res[index])
+                    # print(x, end='')
+                    # index += 1
                     x = (1 if x > threshold else 0)
                     if type_payload:
                         string += str(x)
@@ -134,9 +131,10 @@ def run():
                 if special_bits:
                     temp = ''
                     while count:
-                        x = int(res[index])
-                        print(x, end='')
-                        index += 1
+                        x = mcp.read_adc(channel)
+                        # x = int(res[index])
+                        # print(x, end='')
+                        # index += 1
                         x = (1 if x > threshold else 0)
                         temp += str(x)
                         count -= 1
@@ -150,9 +148,6 @@ def run():
             byte = 0
 
         time.sleep(time_period)
-        print("TABLE STRING", table_string)
-        print("STRING", string)
-
         # print("TABLE STRING", table_string)
         # print("STRING", string)
 
