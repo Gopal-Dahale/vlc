@@ -4,7 +4,7 @@ import ast
 from huffman import Huffman
 from run_length import run_length_encode, run_length_transmit
 import time
-from utils import time_period, transmit_byte, print_stats
+from utils import time_period, transmit_byte, print_stats, fragment_bits, prepare_packet
 import argparse
 import pyae
 
@@ -18,6 +18,34 @@ msg = f.read()
 len_msg = len(msg)
 max_payload = 32  # bits
 max_bits_processing = 64  # bits
+
+
+def simple_transmission(encoded_msg, max_payload, max_bits_processing):
+    len_encoded_msg = len(encoded_msg)
+    index = 0
+    start = time.time()
+    print('Starting transmission\n')
+    while (index < len_encoded_msg):
+        fragment = fragment_bits(encoded_msg, index, len_encoded_msg,
+                                 max_bits_processing)
+        print("FRAGMENT", fragment)
+        print("LEN FRAGMENT", len(fragment))
+        index += max_bits_processing
+        i = 0
+        while (i < len(fragment)):
+            print('Sending packet')
+            packet = prepare_packet(fragment, 1, i, max_payload)
+            print("PACKET", packet)
+            len_packet = len(packet)
+            for k in range(0, len_packet, 8):
+                if (k + 8 < len_packet):
+                    byte = int(packet[k:k + 8], 2)
+                else:
+                    byte = int(packet[k:], 2)
+                transmit_byte(byte)
+            i += max_payload
+    end = time.time()
+    return end - start
 
 
 def run():
@@ -45,33 +73,21 @@ def run():
         AE = pyae.ArithmeticEncoding(frequency_table=frequency_table,
                                      save_stages=False)
         table_bits = AE.frequency_table_to_bits()
-        print("TABLE BITS", table_bits)
-        print("LEN TABLE BITS", len(table_bits))
 
         encoded_msg, _, interval_min_value, interval_max_value = AE.encode(
             msg=msg, probability_table=AE.probability_table)
 
-        print("Encoded Message: {msg}".format(msg=encoded_msg))
-
         # Get the binary code out of the floating-point value
         binary_code, _ = AE.encode_binary(float_interval_min=interval_min_value,
                                           float_interval_max=interval_max_value)
-        print(
-            "The binary code is: {binary_code}".format(binary_code=binary_code))
 
         encoded_msg = binary_code[2:]  # remove decimal point
+    else:
+        # No Encoding scheme
+        encoded_msg = ''.join([bin(ord(char))[2:].zfill(8) for char in msg])
+        print("ENCODED MSG", encoded_msg)
         print("LEN ENCODED MSG", len(encoded_msg))
 
-    # print(run_length_decode(encoded_msg))
-
-    # print('ENCODED MSG', encoded_msg)
-    # print("LEN ENCODED MSG", len(encoded_msg))
-
-    # for i in range(len_encoded_msg):
-    #     if i % max_bits_processing == 0:
-    #         print('__', end='')
-    #     print(encoded_msg[i], end='')
-    # print('\n')
     # synchronize
 
     # Transmit HIGH for some period of time
@@ -108,6 +124,10 @@ def run():
             duration = AE.arithmetic_transmit(table_bits, encoded_msg,
                                               max_payload, max_bits_processing)
             print_stats(duration, len_msg)
+    else:
+        for i in range(iterations):
+            duration = simple_transmission(encoded_msg, max_payload,
+                                           max_bits_processing)
 
 
 try:
