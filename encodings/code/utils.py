@@ -1,7 +1,9 @@
 import time
+import RPi.GPIO as GPIO
 
 # Constants
-time_period = 0.005  # seconds
+time_period = 0.02  # seconds
+data_pin = 3
 
 
 def print_stats(duration, len_msg):
@@ -65,12 +67,13 @@ def transmit_byte(byte):
         print(1 if (byte & (1 << i)) else 0, end='')
 
         ################# TEST START ######################
-        file = open('transmit_out.txt', 'a')
-        file.write(str(1 if (byte & (1 << i)) else 0))
-        file.close()
+        # file = open('transmit_out.txt', 'a')
+        # file.write(str(1 if (byte & (1 << i)) else 0))
+        # file.close()
         ################# TEST END ######################
 
-        # GPIO.output(data_pin, byte & (1 << i))
+        GPIO.output(data_pin, (byte & (1 << i)))
+        # GPIO.output(data_pin, 1)
         time.sleep(time_period)
         i -= 1
     print('\n')

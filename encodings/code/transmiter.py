@@ -6,10 +6,12 @@ import time
 from utils import time_period, transmit_byte, print_stats, fragment_bits, prepare_packet
 import argparse
 import pyae
+import RPi.GPIO as GPIO
 
-# GPIO.setmode(GPIO.BOARD)
-data_pin = 12
-# GPIO.setup(data_pin, GPIO.OUT, initial=0)
+
+GPIO.setmode(GPIO.BOARD)
+data_pin = 3
+GPIO.setup(data_pin, GPIO.OUT, initial=0)
 
 filename = './message.txt'
 f = open(filename, 'r')
@@ -161,5 +163,5 @@ try:
 except KeyboardInterrupt:
     pass
 finally:
-    # GPIO.cleanup()
+    GPIO.cleanup()
     f.close()
