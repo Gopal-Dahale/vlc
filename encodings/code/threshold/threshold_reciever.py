@@ -9,12 +9,15 @@ import Adafruit_GPIO.SPI as SPI
 import Adafruit_MCP3008
 import matplotlib.pyplot as plt
 
+MID = 300
+
+
 def run():
     # Software SPI configuration:
-    CLK  = 18
+    CLK = 18
     MISO = 23
     MOSI = 24
-    CS   = 25
+    CS = 25
     mcp = Adafruit_MCP3008.MCP3008(clk=CLK, cs=CS, miso=MISO, mosi=MOSI)
 
     # Hardware SPI configuration:
@@ -22,32 +25,39 @@ def run():
     # SPI_DEVICE = 0
     # mcp = Adafruit_MCP3008.MCP3008(spi=SPI.SpiDev(SPI_PORT, SPI_DEVICE))
 
-
     print('Reading MCP3008 values, press Ctrl-C to quit...')
 
     # Read all the ADC channel 0 values in a list.
     values = []
     channel = 0
-    count = 50
+    count = 100
     # Main program loop.
     for _ in range(count):
         # The read_adc function will get the value of the specified channel (0-7).
         x = mcp.read_adc(channel)
+        if (x > MID):
+            print(1)
+        else:
+            print(0)
+
         values.append(x)
         # Print the ADC values.
         print('Channel %d: %d' % (channel, x))
         # Pause for half a second.
-        time.sleep(0.05)
-        
+        time.sleep(0.2)
+
     plt.plot(values)
     plt.xlabel('time')
     plt.ylabel('ADC output')
     plt.title('Plot to distinguish 0s and 1s')
-    plt.show()
+    # plt.show()
+    plt.savefig('threshold.png')
+
 
 try:
     run()
 except KeyboardInterrupt:
     pass
 finally:
-    GPIO.cleanup()
+    # GPIO.cleanup()
+    pass

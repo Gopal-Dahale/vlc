@@ -65,7 +65,7 @@ def transmit_byte(byte):
     # print("BYTE", byte)
 
     while (i >= 0):
-        print(1 if (byte & (1 << i)) else 0, end = '')
+        print(1 if (byte & (1 << i)) else 0, end='')
 
         ################# TEST START ######################
         # file = open('transmit_out.txt', 'a')
@@ -77,4 +77,4 @@ def transmit_byte(byte):
         # GPIO.output(data_pin, 1)
         time.sleep(time_period)
         i -= 1
-    # print('\n')
+    print('\n')
