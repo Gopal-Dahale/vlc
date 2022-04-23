@@ -40,18 +40,18 @@ def simple_transmission(encoded_msg, max_payload, max_bits_processing):
         fragment = fragment_bits(encoded_msg, index, len_encoded_msg,
                                  max_bits_processing)  # Create a fragment
 
-        print("FRAGMENT", fragment)
-        print("LEN FRAGMENT", len(fragment))
+        # print("FRAGMENT", fragment)
+        # print("LEN FRAGMENT", len(fragment))
 
         index += max_bits_processing
         i = 0
 
         while (i < len(fragment)):
-            print('Sending packet')
+            # print('Sending packet')
 
             packet = prepare_packet(fragment, 1, i,
                                     max_payload)  # Create a packet
-            print("PACKET", packet)
+            # print("PACKET", packet)
             len_packet = len(packet)
 
             # Transmit bytes of the packet
@@ -69,6 +69,8 @@ def simple_transmission(encoded_msg, max_payload, max_bits_processing):
 
 
 def run():
+    
+    GPIO.output(data_pin, 1)
 
     # Simple parser to parse type of encoding
     parser = argparse.ArgumentParser()
@@ -92,7 +94,7 @@ def run():
 
         # Arithmetic Encoding
         # Create Frequency table
-        frequency_table = {}
+        frequevlcncy_table = {}
         for ch in msg:
             if ch in frequency_table:
                 frequency_table[ch] += 1
@@ -115,26 +117,46 @@ def run():
     else:
         # No Encoding scheme
         encoded_msg = ''.join([bin(ord(char))[2:].zfill(8) for char in msg])
-
+        print("LEN ENCODED MSG", len(encoded_msg))
+    
+    l_e_msg = len(encoded_msg)
+    final_msg_len = 0;
+    final_msg_len += 40*(l_e_msg//32)
+    
+    if(l_e_msg%32):
+        r = (l_e_msg%32) + 8
+        final_msg_len += (r//8)*8
+        if(r%8):
+            final_msg_len += 8
+    
+    final_msg_len = bin(final_msg_len)[2:].zfill(16)
+    print(final_msg_len)
+    
     # Synchronize
 
     # Transmit HIGH for some period of time
     # and then transmit LOW for the reciever
     # to detect the start of the message
-
-    sync_time = 10 * time_period
+    
+    sync_time = 2 * time_period
     HIGH = 255
     LOW = 0
     start = time.time()
 
     #send high
     while (time.time() - start < sync_time):
-        transmit_byte(HIGH)
+        GPIO.output(data_pin, 1)
 
     #send low for neg edge
-    transmit_byte(LOW)  # start of message
-    time.sleep(time_period)
-
+    
+    GPIO.output(data_pin, 0)
+     # start of message
+    time.sleep(time_period *1)
+    
+    # send final_msg_len
+    transmit_byte(int(final_msg_len[:8],2))
+    transmit_byte(int(final_msg_len[8:],2))
+    
     iterations = 1
     if encoding == 'huff':
         for i in range(iterations):

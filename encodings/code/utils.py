@@ -18,17 +18,17 @@ def add_header(payload, type_payload, len_payload):
     type: 0 for table, 1 for data
     len: 4 bits representing maximum of 15 bytes
     '''
-    print('payload: ', payload)
-    print('type_payload: ', type_payload)
-    print('len_payload: ', len_payload)
-    print('bin type_payload', bin(type_payload)[2:])
-    print('bin len_payload', bin(len_payload)[2:].zfill(7))
+    # print('payload: ', payload)
+    # print('type_payload: ', type_payload)
+    # print('len_payload: ', len_payload)
+    # print('bin type_payload', bin(type_payload)[2:])
+    # print('bin len_payload', bin(len_payload)[2:].zfill(7))
     header = bin(type_payload)[2:] + bin(len_payload)[2:].zfill(7)
-    print('header', header)
-    print('len header', len(header))
+    # print('header', header)
+    # print('len header', len(header))
     packet = header + payload
-    print('packet', packet)
-    print('len packet', len(packet))
+    # print('packet', packet)
+    # print('len packet', len(packet))
     return packet
 
 
@@ -62,7 +62,7 @@ def transmit_byte(byte):
     # bit_stream = byte
     # print(bit_stream)
     i = 7
-    print("BYTE", byte)
+    # print("BYTE", byte)
 
     while (i >= 0):
         print(1 if (byte & (1 << i)) else 0, end='')
